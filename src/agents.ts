@@ -42,6 +42,51 @@ export const agents: Record<AgentType, AgentConfig> = {
       return existsSync(join(home, '.cursor'));
     },
   },
+  amp: {
+    name: 'amp',
+    displayName: 'Amp',
+    skillsDir: '.agents/skills',
+    globalSkillsDir: join(home, '.config/agents/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.config/amp'));
+    },
+  },
+  kilo: {
+    name: 'kilo',
+    displayName: 'Kilo Code',
+    skillsDir: '.kilocode/skills',
+    globalSkillsDir: join(home, '.kilocode/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.kilocode'));
+    },
+  },
+  roo: {
+    name: 'roo',
+    displayName: 'Roo Code',
+    skillsDir: '.roo/skills',
+    globalSkillsDir: join(home, '.roo/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.roo'));
+    },
+  },
+  goose: {
+    name: 'goose',
+    displayName: 'Goose',
+    skillsDir: '.goose/skills',
+    globalSkillsDir: join(home, '.config/goose/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.config/goose'));
+    },
+  },
+  antigravity: {
+    name: 'antigravity',
+    displayName: 'Antigravity',
+    skillsDir: '.agent/skills',
+    globalSkillsDir: join(home, '.gemini/antigravity/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(process.cwd(), '.agent')) || existsSync(join(home, '.gemini/antigravity'));
+    },
+  },
 };
 
 export async function detectInstalledAgents(): Promise<AgentType[]> {

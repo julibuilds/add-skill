@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from 'fs/promises';
+import { readdir } from 'fs/promises';
 import { join, basename, dirname } from 'path';
 import matter from 'gray-matter';
 import type { Skill } from './types.js';
@@ -6,18 +6,15 @@ import type { Skill } from './types.js';
 const SKIP_DIRS = ['node_modules', '.git', 'dist', 'build', '__pycache__'];
 
 async function hasSkillMd(dir: string): Promise<boolean> {
-  try {
-    const skillPath = join(dir, 'SKILL.md');
-    const stats = await stat(skillPath);
-    return stats.isFile();
-  } catch {
-    return false;
-  }
+  const skillPath = join(dir, 'SKILL.md');
+  const file = Bun.file(skillPath);
+  return file.exists();
 }
 
 async function parseSkillMd(skillMdPath: string): Promise<Skill | null> {
   try {
-    const content = await readFile(skillMdPath, 'utf-8');
+    const file = Bun.file(skillMdPath);
+    const content = await file.text();
     const { data } = matter(content);
 
     if (!data.name || !data.description) {

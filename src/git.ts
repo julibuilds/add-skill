@@ -1,12 +1,12 @@
-import simpleGit from 'simple-git';
 import { join, normalize, resolve, sep } from 'path';
-import { mkdtemp, rm } from 'fs/promises';
-import { tmpdir } from 'os';
+import { rm } from 'fs/promises';
+import { $ } from 'bun';
+
+const tmpdir = () => Bun.env.TMPDIR ?? '/tmp';
 
 export async function cloneRepo(url: string): Promise<string> {
-  const tempDir = await mkdtemp(join(tmpdir(), 'add-skill-'));
-  const git = simpleGit();
-  await git.clone(url, tempDir, ['--depth', '1']);
+  const tempDir = join(tmpdir(), `add-skill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  await $`git clone --depth 1 ${url} ${tempDir}`.quiet();
   return tempDir;
 }
 

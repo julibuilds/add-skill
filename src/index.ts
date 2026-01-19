@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { program } from 'commander';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
@@ -8,12 +6,10 @@ import { cloneRepo, cleanupTempDir } from './git.js';
 import { discoverSkills, getSkillDisplayName } from './skills.js';
 import { installSkillForAgent, isSkillInstalled, getInstallPath } from './installer.js';
 import { detectInstalledAgents, agents } from './agents.js';
-import { track, setVersion } from './telemetry.js';
 import type { Skill, AgentType } from './types.js';
 import packageJson from '../package.json' with { type: 'json' };
 
 const version = packageJson.version;
-setVersion(version);
 
 interface Options {
   global?: boolean;
@@ -40,12 +36,12 @@ program
         console.log(chalk.bgRed.white.bold(' ERROR ') + ' ' + chalk.red('Missing required argument: source'));
         console.log();
         console.log(chalk.dim('  Usage:'));
-        console.log(`    ${chalk.cyan('npx add-skill')} ${chalk.yellow('<source>')} ${chalk.dim('[options]')}`);
+        console.log(`    ${chalk.cyan('bunx add-skill')} ${chalk.yellow('<source>')} ${chalk.dim('[options]')}`);
         console.log();
         console.log(chalk.dim('  Example:'));
-        console.log(`    ${chalk.cyan('npx add-skill')} ${chalk.yellow('vercel-labs/agent-skills')}`);
+        console.log(`    ${chalk.cyan('bunx add-skill')} ${chalk.yellow('vercel-labs/agent-skills')}`);
         console.log();
-        console.log(chalk.dim('  Run') + ` ${chalk.cyan('npx add-skill --help')} ` + chalk.dim('for more information.'));
+        console.log(chalk.dim('  Run') + ` ${chalk.cyan('bunx add-skill --help')} ` + chalk.dim('for more information.'));
         console.log();
       } else {
         write(str);
@@ -76,8 +72,8 @@ async function main(source: string, options: Options) {
     if (parsed.type === 'local') {
       // Use local path directly, no cloning needed
       spinner.start('Validating local path...');
-      const { existsSync } = await import('fs');
-      if (!existsSync(parsed.localPath!)) {
+      const pathExists = await Bun.file(parsed.localPath!).exists();
+      if (!pathExists) {
         spinner.stop(chalk.red('Path not found'));
         p.outro(chalk.red(`Local path does not exist: ${parsed.localPath}`));
         process.exit(1);
@@ -332,24 +328,6 @@ async function main(source: string, options: Options) {
     console.log();
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
-
-    // Track installation result
-    // Build skillFiles map: { skillName: relative path to SKILL.md }
-    const skillFiles: Record<string, string> = {};
-    for (const skill of selectedSkills) {
-      // skill.path is absolute, compute relative from tempDir
-      const relativePath = skill.path.replace(tempDir + '/', '');
-      skillFiles[skill.name] = relativePath + '/SKILL.md';
-    }
-
-    track({
-      event: 'install',
-      source,
-      skills: selectedSkills.map(s => s.name).join(','),
-      agents: targetAgents.join(','),
-      ...(installGlobally && { global: '1' }),
-      skillFiles: JSON.stringify(skillFiles),
-    });
 
     if (successful.length > 0) {
       // Group by skill name for cleaner output

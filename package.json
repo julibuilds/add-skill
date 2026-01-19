@@ -11,10 +11,10 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
-    "dev": "tsx src/index.ts",
-    "prepublishOnly": "npm run build",
-    "update-readme": "tsx scripts/update-readme.ts"
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outfile dist/index.js --target bun --format esm --sourcemap=inline && bun build src/index.ts --compile --target=bun-darwin-arm64 --minify --sourcemap --outfile bin/add-skill && bun link",
+    "build:npm": "bun build src/index.ts --outfile dist/index.js --target bun --format esm --sourcemap=inline",
+    "prepublishOnly": "bun run build:npm"
   },
   "keywords": [
     "cli",
@@ -40,18 +40,12 @@
   "license": "MIT",
   "dependencies": {
     "@clack/prompts": "^0.9.1",
-    "chalk": "^5.4.1",
+    "chalk": "^5.6.2",
     "commander": "^13.1.0",
-    "gray-matter": "^4.0.3",
-    "simple-git": "^3.27.0"
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
-    "@types/node": "^22.10.0",
-    "tsup": "^8.3.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
-  },
-  "engines": {
-    "node": ">=18"
+    "@types/bun": "^1.3.6",
+    "typescript": "^5.9.3"
   }
 }
